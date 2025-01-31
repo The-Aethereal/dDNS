@@ -4,209 +4,67 @@ import './DDNSService.css';
 
 const contractABI = [
 	{
-		"inputs": [
-			{
-				"internalType": "bytes",
-				"name": "domain",
-				"type": "bytes"
-			},
-			{
-				"internalType": "bytes12",
-				"name": "topLevel",
-				"type": "bytes12"
-			},
-			{
-				"internalType": "bytes15",
-				"name": "newIp",
-				"type": "bytes15"
-			}
-		],
-		"name": "edit",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "emergencyWithdraw",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"inputs": [],
 		"stateMutability": "nonpayable",
 		"type": "constructor"
 	},
 	{
+		"inputs": [],
+		"name": "AccessControlBadConfirmation",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "neededRole",
+				"type": "bytes32"
+			}
+		],
+		"name": "AccessControlUnauthorizedAccount",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidDomain",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidTLD",
+		"type": "error"
+	},
+	{
 		"anonymous": false,
 		"inputs": [
 			{
 				"indexed": true,
-				"internalType": "uint256",
-				"name": "timestamp",
-				"type": "uint256"
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
 			},
 			{
-				"indexed": false,
-				"internalType": "bytes",
-				"name": "domainName",
-				"type": "bytes"
+				"indexed": true,
+				"internalType": "string",
+				"name": "domain",
+				"type": "string"
 			},
 			{
-				"indexed": false,
-				"internalType": "bytes12",
+				"indexed": true,
+				"internalType": "string",
 				"name": "topLevel",
-				"type": "bytes12"
+				"type": "string"
 			},
 			{
 				"indexed": false,
 				"internalType": "bytes15",
-				"name": "newIp",
+				"name": "ip",
 				"type": "bytes15"
-			}
-		],
-		"name": "LogDomainNameEdited",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "uint256",
-				"name": "timestamp",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "bytes",
-				"name": "domainName",
-				"type": "bytes"
-			},
-			{
-				"indexed": false,
-				"internalType": "bytes12",
-				"name": "topLevel",
-				"type": "bytes12"
-			}
-		],
-		"name": "LogDomainNameRegistered",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "uint256",
-				"name": "timestamp",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "bytes",
-				"name": "domainName",
-				"type": "bytes"
-			},
-			{
-				"indexed": false,
-				"internalType": "bytes12",
-				"name": "topLevel",
-				"type": "bytes12"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			}
-		],
-		"name": "LogDomainNameRenewed",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "uint256",
-				"name": "timestamp",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "bytes",
-				"name": "domainName",
-				"type": "bytes"
-			},
-			{
-				"indexed": false,
-				"internalType": "bytes12",
-				"name": "topLevel",
-				"type": "bytes12"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "newOwner",
-				"type": "address"
-			}
-		],
-		"name": "LogDomainNameTransferred",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "uint256",
-				"name": "timestamp",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "_owner",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"name": "LogPurchaseChangeReturned",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "uint256",
-				"name": "timestamp",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "bytes",
-				"name": "domainName",
-				"type": "bytes"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amountInWei",
-				"type": "uint256"
 			},
 			{
 				"indexed": false,
@@ -215,7 +73,7 @@ const contractABI = [
 				"type": "uint256"
 			}
 		],
-		"name": "LogReceipt",
+		"name": "DomainRegistered",
 		"type": "event"
 	},
 	{
@@ -224,48 +82,108 @@ const contractABI = [
 			{
 				"indexed": true,
 				"internalType": "address",
-				"name": "previousOwner",
-				"type": "address"
-			}
-		],
-		"name": "OwnershipRenounced",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "previousOwner",
+				"name": "owner",
 				"type": "address"
 			},
 			{
 				"indexed": true,
-				"internalType": "address",
-				"name": "newOwner",
-				"type": "address"
-			}
-		],
-		"name": "OwnershipTransferred",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "bytes",
+				"internalType": "string",
 				"name": "domain",
-				"type": "bytes"
+				"type": "string"
 			},
 			{
-				"internalType": "bytes12",
+				"indexed": true,
+				"internalType": "string",
 				"name": "topLevel",
-				"type": "bytes12"
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "newExpiry",
+				"type": "uint256"
+			}
+		],
+		"name": "DomainRenewed",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "grantRole",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "domain",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "topLevel",
+				"type": "string"
+			}
+		],
+		"name": "makeCommitment",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "pause",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "Paused",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "domain",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "topLevel",
+				"type": "string"
 			},
 			{
 				"internalType": "bytes15",
 				"name": "ip",
 				"type": "bytes15"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "commitment",
+				"type": "bytes32"
 			}
 		],
 		"name": "register",
@@ -276,53 +194,157 @@ const contractABI = [
 	{
 		"inputs": [
 			{
-				"internalType": "bytes",
+				"internalType": "string",
 				"name": "domain",
-				"type": "bytes"
+				"type": "string"
 			},
 			{
-				"internalType": "bytes12",
+				"internalType": "string",
 				"name": "topLevel",
-				"type": "bytes12"
+				"type": "string"
 			}
 		],
-		"name": "renewDomainName",
+		"name": "renew",
 		"outputs": [],
 		"stateMutability": "payable",
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "renounceOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"inputs": [
 			{
-				"internalType": "bytes",
-				"name": "domain",
-				"type": "bytes"
-			},
-			{
-				"internalType": "bytes12",
-				"name": "topLevel",
-				"type": "bytes12"
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
 			},
 			{
 				"internalType": "address",
-				"name": "newOwner",
+				"name": "callerConfirmation",
 				"type": "address"
 			}
 		],
-		"name": "transferDomain",
+		"name": "renounceRole",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
 		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "revokeRole",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "previousAdminRole",
+				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "newAdminRole",
+				"type": "bytes32"
+			}
+		],
+		"name": "RoleAdminChanged",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			}
+		],
+		"name": "RoleGranted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			}
+		],
+		"name": "RoleRevoked",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "newPrice",
+				"type": "uint256"
+			}
+		],
+		"name": "setBasePrice",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "domain",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "topLevel",
+				"type": "string"
+			},
 			{
 				"internalType": "address",
 				"name": "newOwner",
@@ -336,6 +358,55 @@ const contractABI = [
 	},
 	{
 		"inputs": [],
+		"name": "unpause",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "Unpaused",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "domain",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "topLevel",
+				"type": "string"
+			},
+			{
+				"internalType": "bytes15",
+				"name": "newIP",
+				"type": "bytes15"
+			}
+		],
+		"name": "updateIP",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
 		"name": "withdraw",
 		"outputs": [],
 		"stateMutability": "nonpayable",
@@ -343,20 +414,7 @@ const contractABI = [
 	},
 	{
 		"inputs": [],
-		"name": "BYTES_DEFAULT_VALUE",
-		"outputs": [
-			{
-				"internalType": "bytes1",
-				"name": "",
-				"type": "bytes1"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "DOMAIN_EXPIRATION_DATE",
+		"name": "basePrice",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -369,25 +427,12 @@ const contractABI = [
 	},
 	{
 		"inputs": [],
-		"name": "DOMAIN_NAME_COST",
+		"name": "DEFAULT_ADMIN_ROLE",
 		"outputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "bytes32",
 				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "DOMAIN_NAME_COST_SHORT_ADDITION",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
+				"type": "bytes32"
 			}
 		],
 		"stateMutability": "view",
@@ -422,23 +467,18 @@ const contractABI = [
 	{
 		"inputs": [
 			{
-				"internalType": "bytes32",
-				"name": "",
-				"type": "bytes32"
+				"internalType": "string",
+				"name": "domain",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "topLevel",
+				"type": "string"
 			}
 		],
-		"name": "domainNames",
+		"name": "getDomainDetails",
 		"outputs": [
-			{
-				"internalType": "bytes",
-				"name": "name",
-				"type": "bytes"
-			},
-			{
-				"internalType": "bytes12",
-				"name": "topLevel",
-				"type": "bytes12"
-			},
 			{
 				"internalType": "address",
 				"name": "owner",
@@ -461,57 +501,9 @@ const contractABI = [
 	{
 		"inputs": [
 			{
-				"internalType": "bytes",
+				"internalType": "string",
 				"name": "domain",
-				"type": "bytes"
-			},
-			{
-				"internalType": "bytes12",
-				"name": "topLevel",
-				"type": "bytes12"
-			}
-		],
-		"name": "getDomainHash",
-		"outputs": [
-			{
-				"internalType": "bytes32",
-				"name": "",
-				"type": "bytes32"
-			}
-		],
-		"stateMutability": "pure",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "bytes",
-				"name": "domain",
-				"type": "bytes"
-			},
-			{
-				"internalType": "bytes12",
-				"name": "topLevel",
-				"type": "bytes12"
-			}
-		],
-		"name": "getIP",
-		"outputs": [
-			{
-				"internalType": "bytes15",
-				"name": "",
-				"type": "bytes15"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "bytes",
-				"name": "domain",
-				"type": "bytes"
+				"type": "string"
 			}
 		],
 		"name": "getPrice",
@@ -522,52 +514,18 @@ const contractABI = [
 				"type": "uint256"
 			}
 		],
-		"stateMutability": "pure",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "bytes32",
-				"name": "receiptKey",
-				"type": "bytes32"
-			}
-		],
-		"name": "getReceipt",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [
 			{
-				"internalType": "bytes",
-				"name": "domain",
-				"type": "bytes"
-			},
-			{
-				"internalType": "bytes12",
-				"name": "topLevel",
-				"type": "bytes12"
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
 			}
 		],
-		"name": "getReceiptKey",
+		"name": "getRoleAdmin",
 		"outputs": [
 			{
 				"internalType": "bytes32",
@@ -580,44 +538,44 @@ const contractABI = [
 	},
 	{
 		"inputs": [],
-		"name": "getReceiptList",
+		"name": "gracePeriod",
 		"outputs": [
 			{
-				"internalType": "bytes32[]",
+				"internalType": "uint256",
 				"name": "",
-				"type": "bytes32[]"
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "owner",
-		"outputs": [
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
+			},
 			{
 				"internalType": "address",
-				"name": "",
+				"name": "account",
 				"type": "address"
 			}
 		],
+		"name": "hasRole",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "paymentReceipts",
+		"inputs": [],
+		"name": "OPERATOR_ROLE",
 		"outputs": [
 			{
 				"internalType": "bytes32",
@@ -629,28 +587,25 @@ const contractABI = [
 		"type": "function"
 	},
 	{
-		"inputs": [
+		"inputs": [],
+		"name": "paused",
+		"outputs": [
 			{
-				"internalType": "bytes32",
+				"internalType": "bool",
 				"name": "",
-				"type": "bytes32"
+				"type": "bool"
 			}
 		],
-		"name": "receiptDetails",
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "registrationPeriod",
 		"outputs": [
 			{
 				"internalType": "uint256",
-				"name": "amountPaidWei",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "timestamp",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "expires",
+				"name": "",
 				"type": "uint256"
 			}
 		],
@@ -659,19 +614,38 @@ const contractABI = [
 	},
 	{
 		"inputs": [],
-		"name": "TOP_LEVEL_DOMAIN_MIN_LENGTH",
+		"name": "shortNamePremium",
 		"outputs": [
 			{
-				"internalType": "uint8",
+				"internalType": "uint256",
 				"name": "",
-				"type": "uint8"
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes4",
+				"name": "interfaceId",
+				"type": "bytes4"
+			}
+		],
+		"name": "supportsInterface",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
 		"type": "function"
 	}
 ];
-const contractAddress = '0x121bb9812f134fd1fc1c79880b2199959b8f62d2'; // Your deployed contract address
+const contractAddress = '0xb5f89f5314c56ae00bbe87ec2e08ddce7d8b30a9'; // Your deployed contract address
 
 const DDNSService = () => {
   const [contract, setContract] = useState(null);
@@ -683,6 +657,7 @@ const DDNSService = () => {
   const [loading, setLoading] = useState(false);
   const [account, setAccount] = useState('');
   const [provider, setProvider] = useState(null);
+  const [currentPrice, setCurrentPrice] = useState('0');
 
   // Form states
   const [domainName, setDomainName] = useState('');
@@ -750,9 +725,12 @@ const DDNSService = () => {
       const newProvider = new ethers.providers.Web3Provider(window.ethereum);
       setProvider(newProvider);
 
-      // Listen for account changes
       window.ethereum.on('accountsChanged', (newAccounts) => {
         setAccount(newAccounts[0] || '');
+        if (newAccounts.length === 0) {
+          setProvider(null);
+          setContract(null);
+        }
       });
 
     } catch (err) {
@@ -760,52 +738,109 @@ const DDNSService = () => {
     }
   };
 
+  const ipToBytes15 = (ipString) => {
+	// Convert IPv4 to 4 bytes
+	const ipv4Bytes = ethers.utils.arrayify(
+	  ethers.utils.hexlify(
+		new Uint8Array(ipString.split('.').map(Number))
+	  )
+	);
+	
+	// Pad to 15 bytes (12 null bytes after IPv4)
+	const paddedBytes = new Uint8Array(15);
+	paddedBytes.set(ipv4Bytes);
+	return ethers.utils.hexlify(paddedBytes);
+  };
+
+  const isValidIPv4 = (ip) => {
+	const pattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/;
+	return pattern.test(ip);
+  };
 
   useEffect(() => {
 	const init = async () => {
-		if (!provider || !account) return;
-
+	  if (!provider || !account) return;
+  
 	  try {
-		if (window.ethereum) {
-		  await window.ethereum.request({ method: 'eth_requestAccounts' });
-		  const provider = new ethers.providers.Web3Provider(window.ethereum);
-		  const signer = provider.getSigner();
-		  const contractInstance = new ethers.Contract(
-			contractAddress,
-			contractABI,
-			signer
-		  );
+		const signer = provider.getSigner();
+		const contractInstance = new ethers.Contract(
+		  contractAddress,
+		  contractABI,
+		  signer
+		);
   
-		  // First load critical constants
-		  await loadConstants(contractInstance);
-		  await loadContractOwner(contractInstance);
+		// Load core contract data
+		await loadConstants(contractInstance);
+		await loadContractOwner(contractInstance);
+		setContract(contractInstance);
+		
+		// Load dynamic data
+		await Promise.all([
+		  loadDomains(contractInstance),
+		  loadReceipts(contractInstance),
+		  loadEvents(contractInstance)
+		]);
   
-		  // Then set contract state and setup listeners
-		  setContract(contractInstance);
-		  
-		  // Load remaining data
-		  await loadDomains(contractInstance);
-		  await loadReceipts(contractInstance);
-		  await loadEvents(contractInstance);
+		// Price tracking listener
+		const updatePrice = async () => {
+		  if (domainName) {
+			try {
+			  const price = await contractInstance.getPrice(domainName);
+			  setCurrentPrice(ethers.utils.formatEther(price));
+			} catch (err) {
+			  console.error("Price check error:", err);
+			}
+		  }
+		};
   
-		  // Setup event listeners
-		  contractInstance.on('LogDomainNameRegistered', () => loadDomains(contractInstance));
-		  contractInstance.on('LogDomainNameRenewed', () => loadDomains(contractInstance));
-		  contractInstance.on('LogDomainNameEdited', () => loadDomains(contractInstance));
-		  contractInstance.on('LogDomainNameTransferred', () => loadDomains(contractInstance));
-		}
+		// Initial price check
+		await updatePrice();
+		
+		// Event listeners with error handling
+		const onRegistered = () => {
+		  loadDomains(contractInstance);
+		  updatePrice();
+		};
+  
+		contractInstance.on('DomainRegistered', onRegistered);
+		contractInstance.on('DomainRenewed', onRegistered);
+  
+		// Cleanup
+		return () => {
+		  contractInstance.off('DomainRegistered', onRegistered);
+		  contractInstance.off('DomainRenewed', onRegistered);
+		};
+  
 	  } catch (err) {
 		setError(`Initialization error: ${err.message}`);
 	  }
 	};
   
-    init();
+	init();
+	
 	return () => {
 	  if (contract) {
 		contract.removeAllListeners();
 	  }
 	};
-  }, [provider, account]);
+  }, [provider, account]); // ✅ Maintain core dependencies
+  
+  // Separate effect for price updates on domain name change
+  useEffect(() => {
+	if (contract && domainName) {
+	  const fetchPrice = async () => {
+		try {
+		  const price = await contract.getPrice(domainName);
+		  setCurrentPrice(ethers.utils.formatEther(price));
+		} catch (err) {
+		  console.error("Price update error:", err);
+		}
+	  };
+	  
+	  const debounceTimer = setTimeout(fetchPrice, 300);
+	  return () => clearTimeout(debounceTimer);
+	}
+  }, [domainName, contract]); // ✅ Track domain name changes
   
   // Modified loading functions to accept contract instance
   const loadConstants = async (contractInstance) => {
@@ -837,13 +872,13 @@ const DDNSService = () => {
   
   const loadEvents = async (contractInstance) => {
 	try {
-	  const filter = contractInstance.filters.LogDomainNameRegistered();
-	  const logs = await contractInstance.queryFilter(filter);
+		const filter = contractInstance.filters.DomainRegistered(); 
+		const logs = await contractInstance.queryFilter(filter);
 	  const parsedEvents = logs.map(log => ({
 		type: 'Registration',
-		name: ethers.utils.parseBytes32String(log.args.domainName),
-		tld: ethers.utils.parseBytes32String(log.args.topLevel),
-		timestamp: new Date(log.args.timestamp * 1000).toLocaleString()
+		name: log.args.domain,
+		tld: log.args.topLevel, 
+		timestamp: new Date(log.getBlock().timestamp * 1000).toLocaleString()
 	  }));
 	  setEvents(parsedEvents);
 	} catch (err) {
@@ -857,9 +892,13 @@ const DDNSService = () => {
     setSuccess('');
     
     try {
+      const estimatedGas = await method(...args).estimateGas({
+        value: ethers.utils.parseEther(value)
+      });
+
       const overrides = {
         value: ethers.utils.parseEther(value),
-        gasLimit: 500000
+        gasLimit: estimatedGas.add(100000) // ✅ Add 10% buffer
       };
       
       const tx = await method(...args, overrides);
@@ -869,7 +908,7 @@ const DDNSService = () => {
       await loadReceipts();
       await loadEvents();
     } catch (err) {
-      setError(err.reason || err.message);
+      setError(err.data?.message || err.message); // ✅ Better error parsing
     } finally {
       setLoading(false);
     }
@@ -877,6 +916,7 @@ const DDNSService = () => {
 
   // Enhanced Domain Registration Section
   const renderRegistrationSection = () => (
+	
     <div className="card">
       <h3>🔗 Register New Domain</h3>
       <div className="form-group">
@@ -907,19 +947,32 @@ const DDNSService = () => {
       </div>
 
       <button 
-        onClick={() => executeContractMethod(
-          contract.register,
-          [
-            ethers.utils.formatBytes32String(domainName),
-            ethers.utils.formatBytes32String(tld),
-            ethers.utils.formatBytes32String(ipAddress)
-          ],
-          domainName.length < 8 ? '2' : '1'
-        )}
-		disabled={loading || !contract?.register}
-		>
-        {loading ? 'Processing...' : `Register Domain (${domainName.length < 8 ? '2' : '1'} ETH)`}
-      </button>
+  onClick={async () => {
+    if (!isValidIPv4(ipAddress)) {
+      setError('Invalid IPv4 address');
+      return;
+    }
+    
+    try {
+      const ipBytes = ipToBytes15(ipAddress);
+      await executeContractMethod(
+        contract.register,
+        [
+          domainName,
+          tld,
+          ipBytes,
+          ethers.utils.id(Date.now().toString())
+        ],
+        currentPrice
+      );
+    } catch (err) {
+      setError(`IP conversion failed: ${err.message}`);
+    }
+  }}
+  disabled={loading || !contract?.register}
+>
+  {loading ? 'Processing...' : `Register Domain (${currentPrice} ETH)`}
+</button>
     </div>
   );
 
@@ -933,15 +986,14 @@ const DDNSService = () => {
         className="search-bar"
       />
 
-      <div className="domain-list">
+<div className="domain-list">
         {domains.filter(d => 
-          ethers.utils.parseBytes32String(d.name).includes(searchTerm)
+          d.name.includes(searchTerm) // ✅ CORRECTION: Direct string search
         ).map(domain => (
           <div key={domain.key} className="domain-card">
             <div className="domain-header">
               <h4>
-                {ethers.utils.parseBytes32String(domain.name)}.
-                {ethers.utils.parseBytes32String(domain.topLevel)}
+                {domain.name}.{domain.topLevel} {/* ✅ CORRECTION: Direct access */}
               </h4>
               <span className={`status ${domain.expires > Date.now()/1000 ? 'active' : 'expired'}`}>
                 {domain.expires > Date.now()/1000 ? 'Active' : 'Expired'}
@@ -949,19 +1001,15 @@ const DDNSService = () => {
             </div>
 
             <div className="domain-info">
-              <p>📡 IP: {ethers.utils.parseBytes32String(domain.ip)}</p>
+			  <p>📡 IP: {domain.ip}</p>
               <p>⏳ Expires: {new Date(domain.expires * 1000).toLocaleDateString()}</p>
               <p>👤 Owner: {domain.owner}</p>
             </div>
 
-            <div className="domain-actions">
-			<button 
-  onClick={() => contract?.renewDomainName && executeContractMethod(
-    contract.renewDomainName,
-    [
-      ethers.utils.formatBytes32String(domainName),
-      ethers.utils.formatBytes32String(tld)
-    ],
+			<div className="domain-actions">
+              <button onClick={() => executeContractMethod(
+                contract.renew,
+                [domain.name, domain.topLevel],
     '1'
   )}
 >
@@ -974,7 +1022,7 @@ const DDNSService = () => {
                 maxLength={15}
               />
               <button onClick={() => executeContractMethod(
-                contract.edit,
+                contract.updateIP,
                 [
                   ethers.utils.formatBytes32String(domainName),
                   ethers.utils.formatBytes32String(tld),
@@ -989,7 +1037,7 @@ const DDNSService = () => {
                 onChange={e => setNewOwner(e.target.value)}
               />
               <button onClick={() => executeContractMethod(
-                contract.transferDomain,
+                contract.transferOwnership,
                 [
                   ethers.utils.formatBytes32String(domainName),
                   ethers.utils.formatBytes32String(tld),
@@ -1006,6 +1054,7 @@ const DDNSService = () => {
   );
 
   // Admin Section
+  const isAdmin = contractOwner === account;
   const renderAdminSection = () => (
     <div className="card">
       <h3>🔑 Admin Controls</h3>
@@ -1022,11 +1071,11 @@ const DDNSService = () => {
           placeholder="New Owner Address"
           onChange={e => setNewOwner(e.target.value)}
         />
-        <button onClick={() => executeContractMethod(
+         <button onClick={() => executeContractMethod(
           contract.transferOwnership,
-          [newOwner]
+          [domainName, tld, newOwner] // ✅ CORRECT parameters
         )}>
-          Transfer Contract Ownership
+          Transfer Domain Ownership
         </button>
       </div>
     </div>
@@ -1058,20 +1107,20 @@ const DDNSService = () => {
   );
 
   return (
-    <div className="container">
+	<div className="container">
 	<header>
-  <h1>🌐 Decentralized DNS Manager</h1>
-  <div className="wallet-section">
-    {account ? (
-      <div className="connected-account">
-        Connected: {account.slice(0, 6)}...{account.slice(-4)}
-      </div>
-    ) : (
-      <button onClick={connectWallet} className="connect-button">
-        🔗 Connect Wallet
-      </button>
-    )}
- </div>
+	  <h1>🌐 Decentralized DNS Manager</h1>
+	  <div className="wallet-section">
+		{account ? (
+		  <div className="connected-account">
+			Connected: {`${account.slice(0, 6)}...${account.slice(-4)}`}
+		  </div>
+		) : (
+		  <button onClick={connectWallet} className="connect-button">
+			🔗 Connect Wallet
+		  </button>
+		)}
+	  </div>
   	{/* Error/Success messages */}
 	</header>
 
@@ -1079,8 +1128,8 @@ const DDNSService = () => {
         {renderContractInfo()}
         {renderRegistrationSection()}
         {renderDomainManagement()}
-        {contractOwner === window.ethereum?.selectedAddress && renderAdminSection()}
-      </div>
+		{isAdmin && renderAdminSection()}      
+	 </div>
 
       <div className="card">
         <h3>📨 Recent Activity</h3>
