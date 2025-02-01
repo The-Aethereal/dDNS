@@ -645,8 +645,7 @@ const contractABI = [
 		"type": "function"
 	}
 ];
-const contractAddress = '0xb5f89f5314c56ae00bbe87ec2e08ddce7d8b30a9'; // Your deployed contract address
-
+const contractAddress = '0xff109210c4fefbf0486cd0c9305cd69ea79452b0'; 
 const DDNSService = () => {
   const [contract, setContract] = useState(null);
   const [domains, setDomains] = useState([]);
@@ -658,8 +657,10 @@ const DDNSService = () => {
   const [account, setAccount] = useState('');
   const [provider, setProvider] = useState(null);
   const [currentPrice, setCurrentPrice] = useState('0');
-
-  // Form states
+  const [manualGasLimit, setManualGasLimit] = useState(3000000); 
+  const [useManualGas, setUseManualGas] = useState(false);
+  const [gasHistory, setGasHistory] = useState([]);
+  const [commitment, setCommitment] = useState(null);
   const [domainName, setDomainName] = useState('');
   const [tld, setTld] = useState('');
   const [ipAddress, setIpAddress] = useState('');
@@ -669,13 +670,48 @@ const DDNSService = () => {
   const [newPrice, setNewPrice] = useState('');
   const [contractOwner, setContractOwner] = useState('');
 
-  // Constants from contract
+
   const [constants, setConstants] = useState({
     minLength: 0,
     expiration: 0,
     baseCost: 0,
     shortAddon: 0
   });
+
+  const bytes15ToIP = (bytes15) => {
+    try {
+      const bytes = ethers.utils.arrayify(bytes15);
+      return bytes.slice(0, 4).join('.');
+    } catch {
+      return 'Invalid IP';
+    }
+  };
+
+  const loadUserDomains = async (contractInstance) => {
+    try {
+      const filter = contractInstance.filters.DomainRegistered(account);
+      const logs = await contractInstance.queryFilter(filter);
+      
+      const domains = await Promise.all(
+        logs.map(async log => {
+          const { domain, topLevel } = log.args;
+          const details = await contractInstance.getDomainDetails(domain, topLevel);
+          return {
+            name: domain,
+            topLevel: topLevel,
+            owner: details.owner,
+            ip: details.ip,
+            expires: details.expires.toNumber()
+          };
+        })
+      );
+      
+      setDomains(domains.filter(d => d.owner === account));
+    } catch (err) {
+      setError(`Error loading domains: ${err.message}`);
+    }
+  };
+
 
   const loadDomains = async (contractInstance) => {
 	try {
@@ -738,15 +774,16 @@ const DDNSService = () => {
     }
   };
 
+  
+
   const ipToBytes15 = (ipString) => {
-	// Convert IPv4 to 4 bytes
+
 	const ipv4Bytes = ethers.utils.arrayify(
 	  ethers.utils.hexlify(
 		new Uint8Array(ipString.split('.').map(Number))
 	  )
 	);
 	
-	// Pad to 15 bytes (12 null bytes after IPv4)
 	const paddedBytes = new Uint8Array(15);
 	paddedBytes.set(ipv4Bytes);
 	return ethers.utils.hexlify(paddedBytes);
@@ -755,6 +792,16 @@ const DDNSService = () => {
   const isValidIPv4 = (ip) => {
 	const pattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/;
 	return pattern.test(ip);
+  };
+
+  const calculateAverageGas = () => {
+	if (gasHistory.length === 0) return manualGasLimit;
+	const sum = gasHistory.reduce((a, b) => a + b, 0);
+	return Math.floor(sum / gasHistory.length) * 1.2; 
+  };
+  
+  const updateGasHistory = (gasUsed) => {
+	setGasHistory(prev => [...prev.slice(-9), gasUsed]); 
   };
 
   useEffect(() => {
@@ -769,19 +816,16 @@ const DDNSService = () => {
 		  signer
 		);
   
-		// Load core contract data
 		await loadConstants(contractInstance);
 		await loadContractOwner(contractInstance);
 		setContract(contractInstance);
-		
-		// Load dynamic data
-		await Promise.all([
-		  loadDomains(contractInstance),
-		  loadReceipts(contractInstance),
-		  loadEvents(contractInstance)
-		]);
+		await loadUserDomains(contractInstance);
+		await loadEvents(contractInstance);
   
-		// Price tracking listener
+		const onDomainEvent = () => loadUserDomains(contractInstance);
+		contractInstance.on('DomainRegistered', onDomainEvent);
+		contractInstance.on('DomainRenewed', onDomainEvent);
+  
 		const updatePrice = async () => {
 		  if (domainName) {
 			try {
@@ -793,39 +837,27 @@ const DDNSService = () => {
 		  }
 		};
   
-		// Initial price check
 		await updatePrice();
-		
-		// Event listeners with error handling
-		const onRegistered = () => {
-		  loadDomains(contractInstance);
-		  updatePrice();
-		};
   
-		contractInstance.on('DomainRegistered', onRegistered);
-		contractInstance.on('DomainRenewed', onRegistered);
-  
-		// Cleanup
 		return () => {
-		  contractInstance.off('DomainRegistered', onRegistered);
-		  contractInstance.off('DomainRenewed', onRegistered);
+		  contractInstance.off('DomainRegistered', onDomainEvent);
+		  contractInstance.off('DomainRenewed', onDomainEvent);
 		};
-  
 	  } catch (err) {
 		setError(`Initialization error: ${err.message}`);
 	  }
 	};
   
 	init();
-	
+  
 	return () => {
 	  if (contract) {
 		contract.removeAllListeners();
 	  }
 	};
-  }, [provider, account]); // ✅ Maintain core dependencies
-  
-  // Separate effect for price updates on domain name change
+  }, [provider, account]);
+
+
   useEffect(() => {
 	if (contract && domainName) {
 	  const fetchPrice = async () => {
@@ -840,9 +872,8 @@ const DDNSService = () => {
 	  const debounceTimer = setTimeout(fetchPrice, 300);
 	  return () => clearTimeout(debounceTimer);
 	}
-  }, [domainName, contract]); // ✅ Track domain name changes
+  }, [domainName, contract]);
   
-  // Modified loading functions to accept contract instance
   const loadConstants = async (contractInstance) => {
 	try {
 	  const minLength = await contractInstance.DOMAIN_NAME_MIN_LENGTH();
@@ -887,34 +918,40 @@ const DDNSService = () => {
   };
 
   const executeContractMethod = async (method, args, value = '0') => {
-    setLoading(true);
-    setError('');
-    setSuccess('');
-    
-    try {
-      const estimatedGas = await method(...args).estimateGas({
-        value: ethers.utils.parseEther(value)
-      });
-
-      const overrides = {
-        value: ethers.utils.parseEther(value),
-        gasLimit: estimatedGas.add(100000) // ✅ Add 10% buffer
-      };
-      
-      const tx = await method(...args, overrides);
-      await tx.wait();
-      setSuccess('Transaction successful!');
-      await loadDomains();
-      await loadReceipts();
-      await loadEvents();
-    } catch (err) {
-      setError(err.data?.message || err.message); // ✅ Better error parsing
-    } finally {
-      setLoading(false);
-    }
+	try {
+	  const overrides = {
+		value: ethers.utils.parseEther(value),
+		gasLimit: 500000 
+	  };
+  
+	  console.log('Transaction parameters:', {
+		method: method.name,
+		args,
+		overrides
+	  });
+  
+	  const tx = await method(...args, overrides);
+	  const receipt = await tx.wait();
+	  return receipt;
+	} catch (err) {
+	  console.error('Transaction error:', err);
+	  throw err;
+	}
+  };
+  
+  const generateCommitment = async (domain, tld) => {
+	const packed = ethers.utils.defaultAbiCoder.encode(
+	  ['string', 'string', 'address'],
+	  [domain, tld, account]
+	);
+	return ethers.utils.keccak256(packed);
   };
 
-  // Enhanced Domain Registration Section
+  const verifyCommitment = async (commitment) => {
+	const exists = await contract._commitments(commitment);
+	if (!exists) throw new Error('Commitment not registered');
+  };
+
   const renderRegistrationSection = () => (
 	
     <div className="card">
@@ -946,112 +983,135 @@ const DDNSService = () => {
         />
       </div>
 
-      <button 
-  onClick={async () => {
-    if (!isValidIPv4(ipAddress)) {
-      setError('Invalid IPv4 address');
-      return;
-    }
+	  <button onClick={async () => {
+  try {
+    // 1. Generate commitment
+    const newCommitment = await generateCommitment(domainName, tld);
     
-    try {
-      const ipBytes = ipToBytes15(ipAddress);
-      await executeContractMethod(
-        contract.register,
-        [
-          domainName,
-          tld,
-          ipBytes,
-          ethers.utils.id(Date.now().toString())
-        ],
-        currentPrice
-      );
-    } catch (err) {
-      setError(`IP conversion failed: ${err.message}`);
-    }
-  }}
-  disabled={loading || !contract?.register}
->
+    // 2. Send makeCommitment transaction
+    const makeTx = await contract.makeCommitment(domainName, tld, {
+      value: ethers.utils.parseEther(currentPrice)
+    });
+    
+    // 3. Wait for transaction confirmation
+    await makeTx.wait(1); // Wait for 1 confirmation
+    
+    // 4. Verify commitment was stored
+    await verifyCommitment(newCommitment);
+    
+    // 5. Proceed with registration
+    const ipBytes = ipToBytes15(ipAddress);
+    const registerTx = await contract.register(
+      domainName,
+      tld,
+      ipBytes,
+      newCommitment, {
+        gasLimit: 500000, // Set manual gas limit
+        value: ethers.utils.parseEther(currentPrice)
+      }
+    );
+    
+    await registerTx.wait();
+    setSuccess('Registration successful!');
+    
+  } catch (err) {
+    setError(`Registration failed: ${err.message}`);
+  }
+}}>
+
   {loading ? 'Processing...' : `Register Domain (${currentPrice} ETH)`}
+
+
 </button>
     </div>
   );
 
-  // Enhanced Domain Management Section
   const renderDomainManagement = () => (
-    <div className="card">
-      <h3>🛠 Domain Management</h3>
-      <input
-        placeholder="Search domains..."
-        onChange={e => setSearchTerm(e.target.value)}
-        className="search-bar"
-      />
-
-<div className="domain-list">
-        {domains.filter(d => 
-          d.name.includes(searchTerm) // ✅ CORRECTION: Direct string search
-        ).map(domain => (
-          <div key={domain.key} className="domain-card">
+	<div className="card">
+	  <h3>🛠 Domain Management</h3>
+	  <input
+		placeholder="Search domains..."
+		onChange={e => setSearchTerm(e.target.value)}
+		className="search-bar"
+	  />
+  
+	  <div className="domain-list">
+		{domains.filter(d => 
+		  `${d.name}.${d.topLevel}`.includes(searchTerm)
+		).map(domain => (
+		  <div key={`${domain.name}.${domain.topLevel}`} className="domain-card">
             <div className="domain-header">
-              <h4>
-                {domain.name}.{domain.topLevel} {/* ✅ CORRECTION: Direct access */}
-              </h4>
+              <h4>{domain.name}.{domain.topLevel}</h4>
               <span className={`status ${domain.expires > Date.now()/1000 ? 'active' : 'expired'}`}>
                 {domain.expires > Date.now()/1000 ? 'Active' : 'Expired'}
               </span>
             </div>
-
             <div className="domain-info">
-			  <p>📡 IP: {domain.ip}</p>
+              <p>📡 IP: {bytes15ToIP(domain.ip)}</p>
               <p>⏳ Expires: {new Date(domain.expires * 1000).toLocaleDateString()}</p>
               <p>👤 Owner: {domain.owner}</p>
             </div>
-
 			<div className="domain-actions">
-              <button onClick={() => executeContractMethod(
-                contract.renew,
-                [domain.name, domain.topLevel],
-    '1'
-  )}
->
-  Renew (1 ETH)
-</button>
+            <button onClick={async () => {
+              try {
+                await executeContractMethod(
+                  contract.renew,
+                  [domain.name, domain.topLevel],
+                  ethers.utils.parseEther(currentPrice).toString()
+                );
+                loadUserDomains(contract);
+              } catch (err) {
+                setError(`Renewal failed: ${err.message}`);
+              }
+            }}>
+              Renew ({currentPrice} ETH)
+            </button>
 
-              <input
-                placeholder="New IP"
-                onChange={e => setIpAddress(e.target.value)}
-                maxLength={15}
-              />
-              <button onClick={() => executeContractMethod(
-                contract.updateIP,
-                [
-                  ethers.utils.formatBytes32String(domainName),
-                  ethers.utils.formatBytes32String(tld),
-                  ethers.utils.formatBytes32String(ipAddress)
-                ]
-              )}>
-                Update IP
-              </button>
+            <input
+              placeholder="New IP"
+              onChange={e => setIpAddress(e.target.value)}
+              maxLength={15}
+            />
+            <button onClick={async () => {
+              try {
+                const ipBytes = ipToBytes15(ipAddress);
+                await executeContractMethod(
+                  contract.updateIP,
+                  [domain.name, domain.topLevel, ipBytes]
+                );
+                loadUserDomains(contract);
+              } catch (err) {
+                setError(`IP update failed: ${err.message}`);
+              }
+            }}>
+              Update IP
+            </button>
 
-              <input
-                placeholder="New Owner Address"
-                onChange={e => setNewOwner(e.target.value)}
-              />
-              <button onClick={() => executeContractMethod(
-                contract.transferOwnership,
-                [
-                  ethers.utils.formatBytes32String(domainName),
-                  ethers.utils.formatBytes32String(tld),
-                  newOwner
-                ]
-              )}>
-                Transfer
-              </button>
-            </div>
+            <input
+              placeholder="New Owner Address"
+              onChange={e => setNewOwner(e.target.value)}
+            />
+            <button onClick={async () => {
+              try {
+                await executeContractMethod(
+                  contract.transferOwnership,
+                  [domain.name, domain.topLevel, newOwner]
+                );
+                loadUserDomains(contract);
+              } catch (err) {
+                setError(`Transfer failed: ${err.message}`);
+              }
+            }}>
+              Transfer
+            </button>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
-  );
+  </div>
+);
+
+		
 
   // Admin Section
   const isAdmin = contractOwner === account;
@@ -1073,15 +1133,42 @@ const DDNSService = () => {
         />
          <button onClick={() => executeContractMethod(
           contract.transferOwnership,
-          [domainName, tld, newOwner] // ✅ CORRECT parameters
+          [domainName, tld, newOwner]
         )}>
           Transfer Domain Ownership
         </button>
+
+		<div className="gas-controls">
+        <h4>Gas Management</h4>
+        <label>
+          <input 
+            type="checkbox" 
+            checked={useManualGas}
+            onChange={(e) => setUseManualGas(e.target.checked)}
+          />
+          Use Manual Gas Limits
+        </label>
+        
+        <div className="form-group">
+          <label>Manual Gas Limit (current: {manualGasLimit})</label>
+          <input
+            type="number"
+            value={manualGasLimit}
+            onChange={(e) => setManualGasLimit(Math.max(0, parseInt(e.target.value) || 0))}
+          />
+        </div>
+        
+        <button onClick={() => setManualGasLimit(calculateAverageGas())}>
+          Set to Historical Average ({calculateAverageGas()})
+        </button>
+        
+        <p>Last 10 transactions gas usage: {gasHistory.join(', ') || 'None'}</p>
+      </div>
+
       </div>
     </div>
   );
 
-  // Contract Info Section
   const renderContractInfo = () => (
     <div className="card">
       <h3>📜 Contract Information</h3>
@@ -1146,6 +1233,6 @@ const DDNSService = () => {
       </div>
     </div>
   );
-};
 
+}
 export default DDNSService;
